@@ -1112,11 +1112,9 @@ ImVec2 ImQuadBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, fl
 
 static void PathQuadBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level)
 {
-    // Compare the ratio of the midpoint distance to the length of the segment
     float dx = x3 - x1, dy = y3 - y1;
     float det = (x2 - x3) * dy - (y2 - y3) * dx;
-    det = (det >= 0) ? det : -det;
-    if (det * det < sqrt(tess_tol) * (dx * dx + dy * dy))
+    if (det * det * 4.0f < tess_tol * (dx * dx + dy * dy))
     {
         path->push_back(ImVec2(x3, y3));
     }
@@ -1125,9 +1123,8 @@ static void PathQuadBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1
         float x12 = (x1 + x2) * 0.5f, y12 = (y1 + y2) * 0.5f;
         float x23 = (x2 + x3) * 0.5f, y23 = (y2 + y3) * 0.5f;
         float x123 = (x12 + x23) * 0.5f, y123 = (y12 + y23) * 0.5f;
-
         PathQuadBezierToCasteljau(path, x1, y1, x12, y12, x123, y123, tess_tol, level + 1);
-        PathQuadBezierToCasteljau(path, x123, y123, x23, x23, x3, y3, tess_tol, level + 1);
+        PathQuadBezierToCasteljau(path, x123, y123, x23, y23, x3, y3, tess_tol, level + 1);
     }
 }
 

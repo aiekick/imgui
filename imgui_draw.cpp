@@ -1050,6 +1050,7 @@ void ImDrawList::PathArcTo(const ImVec2& center, float radius, float a_min, floa
     }
 }
 
+// Cubic bezier
 ImVec2 ImBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, float t)
 {
     float u = 1.0f - t;
@@ -1060,6 +1061,7 @@ ImVec2 ImBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const 
     return ImVec2(w1*p1.x + w2*p2.x + w3*p3.x + w4*p4.x, w1*p1.y + w2*p2.y + w3*p3.y + w4*p4.y);
 }
 
+// Cubic bezier
 // Closely mimics BezierClosestPointCasteljauStep() in imgui.cpp
 static void PathBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level)
 {
@@ -1086,6 +1088,7 @@ static void PathBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, fl
     }
 }
 
+// Cubic bezier
 void ImDrawList::PathBezierCurveTo(const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, int num_segments)
 {
     ImVec2 p1 = _Path.back();
@@ -1101,6 +1104,7 @@ void ImDrawList::PathBezierCurveTo(const ImVec2& p2, const ImVec2& p3, const ImV
     }
 }
 
+// Quadratic bezier
 ImVec2 ImQuadBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, float t)
 {
     float u = 1.0f - t;
@@ -1110,6 +1114,7 @@ ImVec2 ImQuadBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, fl
     return ImVec2(w1 * p1.x + w2 * p2.x + w3 * p3.x, w1 * p1.y + w2 * p2.y + w3 * p3.y);
 }
 
+// Quadratic bezier
 static void PathQuadBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level)
 {
     float dx = x3 - x1, dy = y3 - y1;
@@ -1128,12 +1133,12 @@ static void PathQuadBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1
     }
 }
 
+// Quadratic bezier
 void ImDrawList::PathQuadBezierCurveTo(const ImVec2& p2, const ImVec2& p3, int num_segments)
 {
     ImVec2 p1 = _Path.back();
     if (num_segments == 0)
     {
-        //PathBezierToCasteljau(&_Path, p1.x, p1.y, p2.x, p2.y, p2.x, p2.y, p3.x, p3.y, _Data->CurveTessellationTol, 0); // Auto-tessellated
         PathQuadBezierToCasteljau(&_Path, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, _Data->CurveTessellationTol, 0); // Auto-tessellated
     }
     else

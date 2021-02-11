@@ -7,7 +7,7 @@
 # (On Windows, you may need to execute emsdk_env.bat or encmdprompt.bat ahead)
 #
 # Running `make` will produce three files:
-#  - web/index.html
+#  - web/index.html (current stored in the repository)
 #  - web/index.js
 #  - web/index.wasm
 #
@@ -16,11 +16,11 @@
 CC = emcc
 CXX = em++
 WEB_DIR = web
-EXE = $(WEB_DIR)/index.html
+EXE = $(WEB_DIR)/index.js
 IMGUI_DIR = ../..
 SOURCES = main.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
-SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
+SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_wgpu.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
@@ -28,14 +28,10 @@ UNAME_S := $(shell uname -s)
 ## EMSCRIPTEN OPTIONS
 ##---------------------------------------------------------------------
 
-EMS += -s USE_SDL=2 -s WASM=1
+EMS += -s USE_GLFW=3 -s USE_WEBGPU=1 -s WASM=1
 EMS += -s ALLOW_MEMORY_GROWTH=1
 EMS += -s DISABLE_EXCEPTION_CATCHING=1 -s NO_EXIT_RUNTIME=0
 EMS += -s ASSERTIONS=1
-
-# Uncomment next line to fix possible rendering bugs with Emscripten version older then 1.39.0 (https://github.com/ocornut/imgui/issues/2877)
-#EMS += -s BINARYEN_TRAP_MODE=clamp
-#EMS += -s SAFE_HEAP=1    ## Adds overhead
 
 # Emscripten allows preloading a file or folder to be accessible at runtime.
 # The Makefile for this example project suggests embedding the misc/fonts/ folder into our application, it will then be accessible as "/fonts"
@@ -58,7 +54,7 @@ CPPFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
 CPPFLAGS += -Wall -Wformat -Os
 CPPFLAGS += $(EMS)
 LIBS += $(EMS)
-LDFLAGS += --shell-file shell_minimal.html
+#LDFLAGS += --shell-file shell_minimal.html
 
 ##---------------------------------------------------------------------
 ## BUILD RULES
@@ -73,9 +69,6 @@ LDFLAGS += --shell-file shell_minimal.html
 %.o:$(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%.o:../libs/gl3w/GL/%.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
-
 all: $(EXE)
 	@echo Build complete for $(EXE)
 
@@ -89,4 +82,4 @@ $(EXE): $(OBJS) $(WEB_DIR)
 	$(CXX) -o $@ $(OBJS) $(LIBS) $(LDFLAGS)
 
 clean:
-	rm -rf $(OBJS) $(WEB_DIR)
+	rm -f $(EXE) $(OBJS) $(WEB_DIR)/*.js $(WEB_DIR)/*.wasm $(WEB_DIR)/*.wasm.pre
